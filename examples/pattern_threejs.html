@@ -30,13 +30,43 @@ html,body {
 <script async src="../build/artoolkit.min.js"></script>
 <script async src="js/third_party/three.js/three.min.js"></script>
 <script async src="../js/artoolkit.three.js"></script>
+<script async src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 
 <script>
 
 window.ARThreeOnLoad = function() {
+navigator.mediaDevices.enumerateDevices()
+  .then(
+    function(devices) {
+      let sourceId = null;
+      // Enumerate all devices
+      for (var device of devices) {
+        // If there is still no video input, or if this is the rear camera
+        if (device.kind == 'videoinput' && (!sourceId || device.label.indexOf('back') !== -1)) {
+          sourceId = device.deviceId;
+        }
+      }
+      alert("enumerateDevices" + sourceId);
+      // We didn't find any video input
+      if (!sourceId) {
+        throw 'No video input';
+      }
+      
+      OnDeviceLoaded(sourceId);
 
-	ARController.getUserMediaThreeScene({maxARVideoSize: 320, cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat', 
-	onSuccess: function(arScene, arController, arCamera) {
+    }
+  );
+}
+
+OnDeviceLoaded = function(sourceId) {
+	//alert("caller is " + arguments.callee.caller.toString());
+	
+  ARController.getUserMediaThreeScene(
+  	{
+  		sourceId: sourceId,
+  		maxARVideoSize: 320, 
+  		cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat', 
+		onSuccess: function(arScene, arController, arCamera) {
 
 		document.body.className = arController.orientation;
 
@@ -92,6 +122,12 @@ window.ARThreeOnLoad = function() {
 			arScene.scene.add(markerRoot);
 		});
 
+		arController.loadMarker('Data/marker16_2.pat', function(markerId) {
+			var markerRoot = arController.createThreeMarker(markerId);
+			markerRoot.add(torus);
+			arScene.scene.add(markerRoot);
+		});
+
 		var tick = function() {
 			arScene.process();
 
@@ -109,12 +145,11 @@ window.ARThreeOnLoad = function() {
 	}});
 
 	delete window.ARThreeOnLoad;
-
 };
 
-if (window.ARController && ARController.getUserMediaThreeScene) {
-	ARThreeOnLoad();
-}
+//if (window.ARController && ARController.getUserMediaThreeScene) {
+	//ARThreeOnLoad();
+//}
 </script>
 
 </body>

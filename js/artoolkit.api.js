@@ -1143,9 +1143,15 @@
 			}
 		}
 
-		mediaDevicesConstraints.facingMode = facing;
+	
+		if(configuration.sourceId){
+			alert("source!");
+			mediaDevicesConstraints.sourceId = configuration.sourceId;
+		} else {
+			mediaDevicesConstraints.facingMode = facing;
+		}
 
-		navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		//navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		var hdConstraints = {
 			audio: false,
 			video: {
@@ -1153,9 +1159,10 @@
 		  	}
 		};
 
-		if ( false ) {
+		if ( true ) {
 		// if ( navigator.mediaDevices || window.MediaStreamTrack) {
 			if (navigator.mediaDevices) {
+						alert("mediaDevices! " + mediaDevicesConstraints.toString());
 				navigator.mediaDevices.getUserMedia({
 					audio: false,
 					video: mediaDevicesConstraints
