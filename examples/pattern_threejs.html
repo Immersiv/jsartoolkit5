@@ -46,7 +46,6 @@ navigator.mediaDevices.enumerateDevices()
           sourceId = device.deviceId;
         }
       }
-      alert("enumerateDevices" + sourceId);
       // We didn't find any video input
       if (!sourceId) {
         throw 'No video input';
@@ -59,12 +58,11 @@ navigator.mediaDevices.enumerateDevices()
 }
 
 OnDeviceLoaded = function(sourceId) {
-	//alert("caller is " + arguments.callee.caller.toString());
 	
   ARController.getUserMediaThreeScene(
   	{
   		sourceId: sourceId,
-  		maxARVideoSize: 320, 
+  		maxARVideoSize: 640, 
   		cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat', 
 		onSuccess: function(arScene, arController, arCamera) {
 

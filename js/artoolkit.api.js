@@ -1145,7 +1145,6 @@
 
 	
 		if(configuration.sourceId){
-			alert("source!");
 			mediaDevicesConstraints.sourceId = configuration.sourceId;
 		} else {
 			mediaDevicesConstraints.facingMode = facing;
@@ -1162,7 +1161,6 @@
 		if ( true ) {
 		// if ( navigator.mediaDevices || window.MediaStreamTrack) {
 			if (navigator.mediaDevices) {
-						alert("mediaDevices! " + mediaDevicesConstraints.toString());
 				navigator.mediaDevices.getUserMedia({
 					audio: false,
 					video: mediaDevicesConstraints
