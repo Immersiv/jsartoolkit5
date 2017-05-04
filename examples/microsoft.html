@@ -1,0 +1,163 @@
+<html>
+<head>
+<title>Immersiv AR Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+<style>
+html,body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	text-align: center;
+	overflow-x: hidden;
+}
+.portrait canvas {
+	transform-origin: 0 0;
+	transform: rotate(-90deg) translateX(-100%);
+}
+.desktop canvas {
+ 	transform: scale(-1, 1);
+}
+</style>
+</head>
+<body>
+
+<h1>Immersiv AR Demo</h1>
+
+<script async src="../build/artoolkit.min.js"></script>
+<script async src="js/third_party/three.js/three.min.js"></script>
+<script async src="../js/artoolkit.three.js"></script>
+<script async src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+
+<script>
+
+window.ARThreeOnLoad = function() {
+navigator.mediaDevices.enumerateDevices()
+  .then(
+    function(devices) {
+      let sourceId = null;
+      // Enumerate all devices
+      for (var device of devices) {
+        // If there is still no video input, or if this is the rear camera
+        if (device.kind == 'videoinput' && (!sourceId || device.label.indexOf('back') !== -1)) {
+          sourceId = device.deviceId;
+        }
+      }
+      // We didn't find any video input
+      if (!sourceId) {
+        throw 'No video input';
+      }
+      
+      OnDeviceLoaded(sourceId);
+
+    }
+  );
+}
+
+OnDeviceLoaded = function(sourceId) {
+	
+  ARController.getUserMediaThreeScene(
+  	{
+  		sourceId: sourceId,
+  		maxARVideoSize: 640, 
+  		cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat', 
+		onSuccess: function(arScene, arController, arCamera) {
+
+		document.body.className = arController.orientation;
+
+		var renderer = new THREE.WebGLRenderer({antialias: true});
+		if (arController.orientation === 'portrait') {
+			var w = (window.innerWidth / arController.videoHeight) * arController.videoWidth;
+			var h = window.innerWidth;
+			renderer.setSize(w, h);
+			renderer.domElement.style.paddingBottom = (w-h) + 'px';
+		} else {
+			if (/Android|mobile|iPad|iPhone/i.test(navigator.userAgent)) {
+				renderer.setSize(window.innerWidth, (window.innerWidth / arController.videoWidth) * arController.videoHeight);
+			} else {
+				renderer.setSize(arController.videoWidth, arController.videoHeight);
+				document.body.className += ' desktop';
+			}
+		}
+
+		document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+		var rotationV = 0;
+		var rotationTarget = 0;
+
+		renderer.domElement.addEventListener('click', function(ev) {
+			ev.preventDefault();
+			rotationTarget += 1;
+		}, false);
+
+		var sphere = new THREE.Mesh(
+			new THREE.SphereGeometry(0.5, 8, 8),
+			new THREE.MeshNormalMaterial()
+		);
+		sphere.material.shading = THREE.FlatShading;
+		sphere.position.z = 0.5;
+
+		var torus = new THREE.Mesh(
+			new THREE.TorusGeometry(0.3, 0.2, 8, 8),
+			new THREE.MeshNormalMaterial()
+		);
+		torus.material.shading = THREE.FlatShading;
+		torus.position.z = 0.5;
+		torus.rotation.x = Math.PI/2;
+
+
+
+		var loader = new THREE.ObjectLoader();
+
+		loader.load(
+		    // resource URL
+		    "Data/temple3.json",
+
+		    // pass the loaded data to the onLoad function.
+		//Here it is assumed to be an object
+		    function ( obj ) {
+		    	//add the loaded object to the scene
+				arController.loadMarker('Data/sf16.pat', function(markerId) {
+					var markerRoot = arController.createThreeMarker(markerId);
+					markerRoot.add(obj);
+					arScene.scene.add(markerRoot);
+				});
+		    },
+
+		    // Function called when download progresses
+		    function ( xhr ) {
+		        console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+		    },
+
+		    // Function called when download errors
+		    function ( xhr ) {
+		        console.error( 'An error happened' );
+		    }
+		);
+		
+
+		var tick = function() {
+			arScene.process();
+
+			rotationV += (rotationTarget - sphere.rotation.z) * 0.05;
+			sphere.rotation.z += rotationV;
+			torus.rotation.y += rotationV;
+			rotationV *= 0.8;
+
+			arScene.renderOn(renderer);
+			requestAnimationFrame(tick);
+		};
+
+		tick();
+
+	}});
+
+	delete window.ARThreeOnLoad;
+};
+
+//if (window.ARController && ARController.getUserMediaThreeScene) {
+	//ARThreeOnLoad();
+//}
+</script>
+
+</body>
+</html>
