@@ -1150,7 +1150,7 @@
 			mediaDevicesConstraints.facingMode = facing;
 		}
 
-		//navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		var hdConstraints = {
 			audio: false,
 			video: {
@@ -1158,7 +1158,7 @@
 		  	}
 		};
 
-		if ( true ) {
+		if ( navigator.mediaDevices ) {
 		// if ( navigator.mediaDevices || window.MediaStreamTrack) {
 			if (navigator.mediaDevices) {
 				navigator.mediaDevices.getUserMedia({
